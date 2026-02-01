@@ -13,6 +13,9 @@ if uploaded_file:
     filtered_df=df[df['Account_Name']==option]
     st.subheader(f"Data Preview for {option}")
     st.dataframe(filtered_df)
+    st.divider()
+    st.subheader("Customize your email")
+    extra_instruction=st.text_area("Any extra instruction for AI",placeholder="offer 10% discount,firm message")
 
 if api_key:
     genai.configure(api_key=api_key)
@@ -22,10 +25,17 @@ if api_key:
     if st.button("Draft Client Email."):
         with st.spinner("AI is composing an email"):
             prompt=f"""
-            you are a professional email writer.write an professional
-            email to {company_name} and mention their {agreement_id} for their 
-            renewal.
+            write a professional email to the client about this data:
+            {df[df['Account_Name']==option].to_string()}
+            important user instructions:
+            {extra_instruction}
              """
             response=model.generate_content(prompt)
             st.success("AI Email Generated")
             st.markdown(response.text)
+            st.download_button(
+                label="Download Text File",
+                data=response.text,
+                file_name='simple_text.txt',
+                mime='text/plain'
+            )
